@@ -65,11 +65,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid #f8f5ed; outline-offs
   position: relative;
   width: min(430px, 100%);
   min-height: 720px;
-  overflow: hidden;
-  border: 2px solid #171819;
-  border-radius: 5px 7px 4px 6px;
-  box-shadow: 1px 2px 0 #171819, inset 0 0 0 1px rgba(255, 255, 255, .025);
-  background: rgba(43, 44, 46, .23);
 }
 
 .poster--about { min-height: 760px; }

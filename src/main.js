@@ -2,15 +2,10 @@ import './style.css';
 import { siteConfig } from './config.js';
 
 const app = document.querySelector('#app');
-const requestedPath = window.location.pathname.replace(/\/+$/, '') || '/';
-const currentPage = requestedPath === '/about' ? 'about' : document.body.dataset.page ?? 'home';
 
-if (currentPage === 'about') {
-  document.title = 'About — Call a Christian';
-  document.querySelector('meta[name="description"]')?.setAttribute(
-    'content',
-    'A place for prayer, faith questions, and an honest conversation.',
-  );
+function pageForPath() {
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  return path === '/about' ? 'about' : 'home';
 }
 
 function escapeHtml(value) {
@@ -46,7 +41,7 @@ function phoneAction() {
   if (!ready) {
     return '<div class="phone-action phone-action--inactive" aria-label="Phone line coming soon">Phone line<br><span>coming soon</span></div>';
   }
-  const phoneHref = `tel:${encodeURIComponent(siteConfig.contactNumberE164)}`;
+  const phoneHref = `tel:${escapeHtml(siteConfig.contactNumberE164)}`;
   return `
     <button class="phone-action phone-action--ready" type="button" aria-expanded="false" aria-controls="contact-options">Call<br><span>${escapeHtml(siteConfig.contactNumberDisplay)}</span></button>
     <div class="contact-options" id="contact-options" hidden>
@@ -60,7 +55,7 @@ function phoneAction() {
 
 function home() {
   return `
-    <main id="main-content" class="sketch-page sketch-page--home">
+    <main id="main-content" class="sketch-page sketch-page--home" tabindex="-1">
       <section class="poster poster--home" aria-labelledby="home-heading">
         ${crosses('home')}
         <div class="poster-content home-content">
@@ -90,7 +85,7 @@ function portrait(name, side) {
 
 function about() {
   return `
-    <main id="main-content" class="sketch-page sketch-page--about">
+    <main id="main-content" class="sketch-page sketch-page--about" tabindex="-1">
       <section class="poster poster--about" aria-labelledby="about-heading">
         ${crosses('about')}
         <div class="poster-content about-content">
@@ -110,9 +105,8 @@ function about() {
   `;
 }
 
-app.innerHTML = currentPage === 'about' ? about() : home();
-
-if (currentPage === 'home' && siteConfig.contactReady && siteConfig.contactNumberE164) {
+function bindPhoneAction() {
+  if (!siteConfig.contactReady || !siteConfig.contactNumberE164) return;
   const trigger = app.querySelector('.phone-action--ready');
   const options = app.querySelector('#contact-options');
   const feedback = app.querySelector('.contact-feedback');
@@ -143,3 +137,31 @@ if (currentPage === 'home' && siteConfig.contactReady && siteConfig.contactNumbe
     feedback.textContent = 'Contact downloaded.';
   });
 }
+
+function renderPage() {
+  const isAbout = pageForPath() === 'about';
+  document.title = isAbout ? 'About — Call a Christian' : 'Call a Christian';
+  document.querySelector('meta[name="description"]')?.setAttribute(
+    'content',
+    isAbout
+      ? 'A place for prayer, faith questions, and an honest conversation.'
+      : 'Call a Christian for prayer, a faith question, or someone to talk to.',
+  );
+  app.innerHTML = isAbout ? about() : home();
+  if (!isAbout) bindPhoneAction();
+}
+
+app.addEventListener('click', (event) => {
+  const link = event.target.closest('.about-link, .back-link');
+  if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (window.location.pathname !== link.pathname) {
+    window.history.pushState(null, '', link.pathname);
+    renderPage();
+    window.scrollTo(0, 0);
+    app.querySelector('main')?.focus({ preventScroll: true });
+  }
+});
+
+window.addEventListener('popstate', renderPage);
+renderPage();
