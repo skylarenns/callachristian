@@ -41,12 +41,15 @@ function phoneAction() {
   if (!ready) {
     return '<div class="phone-action phone-action--inactive" aria-label="Phone line coming soon">Phone line<br><span>coming soon</span></div>';
   }
-  const phoneHref = `tel:${escapeHtml(siteConfig.contactNumberE164)}`;
+  const numbers = [
+    { display: siteConfig.contactNumberDisplay, e164: siteConfig.contactNumberE164 },
+    ...siteConfig.additionalContactNumbers,
+  ];
   return `
-    <button class="phone-action phone-action--ready" type="button" aria-expanded="false" aria-controls="contact-options">Call<br><span>${escapeHtml(siteConfig.contactNumberDisplay)}</span></button>
+    <button class="phone-action phone-action--ready" type="button" aria-expanded="false" aria-controls="contact-options">${numbers.map(({ display }) => `<span>${escapeHtml(display)}</span>`).join('<br>')}</button>
     <div class="contact-options" id="contact-options" hidden>
-      <a href="${phoneHref}">Call now</a>
-      <button type="button" id="copy-number">Copy number</button>
+      ${numbers.map(({ display, e164 }) => `<a href="tel:${escapeHtml(e164)}">Call ${escapeHtml(display)}</a>`).join('')}
+      <button type="button" id="copy-number">Copy numbers</button>
       <button type="button" id="save-contact">Save contact</button>
     </div>
     <p class="contact-feedback" role="status" aria-live="polite"></p>
@@ -107,6 +110,10 @@ function about() {
 
 function bindPhoneAction() {
   if (!siteConfig.contactReady || !siteConfig.contactNumberE164) return;
+  const numbers = [
+    { display: siteConfig.contactNumberDisplay, e164: siteConfig.contactNumberE164 },
+    ...siteConfig.additionalContactNumbers,
+  ];
   const trigger = app.querySelector('.phone-action--ready');
   const options = app.querySelector('#contact-options');
   const feedback = app.querySelector('.contact-feedback');
@@ -119,15 +126,16 @@ function bindPhoneAction() {
 
   app.querySelector('#copy-number').addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(siteConfig.contactNumberDisplay);
-      feedback.textContent = 'Number copied.';
+      await navigator.clipboard.writeText(numbers.map(({ display }) => display).join('\n'));
+      feedback.textContent = 'Numbers copied.';
     } catch {
       feedback.textContent = 'Copy unavailable in this browser.';
     }
   });
 
   app.querySelector('#save-contact').addEventListener('click', () => {
-    const vcard = `BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Call a Christian\r\nTEL;TYPE=VOICE:${siteConfig.contactNumberE164}\r\nEND:VCARD\r\n`;
+    const phoneLines = numbers.map(({ e164 }) => `TEL;TYPE=VOICE:${e164}`).join('\r\n');
+    const vcard = `BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Call a Christian\r\n${phoneLines}\r\nEND:VCARD\r\n`;
     const url = URL.createObjectURL(new Blob([vcard], { type: 'text/vcard' }));
     const link = document.createElement('a');
     link.href = url;
