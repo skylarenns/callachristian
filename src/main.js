@@ -46,9 +46,11 @@ function phoneAction() {
     ...siteConfig.additionalContactNumbers,
   ];
   return `
-    <button class="phone-action phone-action--ready" type="button" aria-expanded="false" aria-controls="contact-options">${numbers.map(({ display }) => `<span>${escapeHtml(display)}</span>`).join('<br>')}</button>
+    <div class="phone-action phone-action--ready">
+      ${numbers.map(({ display, e164 }) => `<a class="phone-number" href="tel:${escapeHtml(e164)}">${escapeHtml(display)}</a>`).join('')}
+    </div>
+    <button class="contact-options-trigger" type="button" aria-expanded="false" aria-controls="contact-options">Copy / save</button>
     <div class="contact-options" id="contact-options" hidden>
-      ${numbers.map(({ display, e164 }) => `<a href="tel:${escapeHtml(e164)}">Call ${escapeHtml(display)}</a>`).join('')}
       <button type="button" id="copy-number">Copy numbers</button>
       <button type="button" id="save-contact">Save contact</button>
     </div>
@@ -114,7 +116,7 @@ function bindPhoneAction() {
     { display: siteConfig.contactNumberDisplay, e164: siteConfig.contactNumberE164 },
     ...siteConfig.additionalContactNumbers,
   ];
-  const trigger = app.querySelector('.phone-action--ready');
+  const trigger = app.querySelector('.contact-options-trigger');
   const options = app.querySelector('#contact-options');
   const feedback = app.querySelector('.contact-feedback');
 

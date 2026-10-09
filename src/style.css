@@ -134,10 +134,11 @@ h1, p { margin: 0; }
   transform: rotate(-4deg);
 }
 
-.phone-action span { font-size: 2rem; }
+.phone-number { display: block; color: inherit; font-size: 2rem; line-height: 1; text-decoration: none; }
 .phone-action:not(.phone-action--inactive):hover { background: #f8f5ed; color: #303133; }
 .phone-action--inactive { cursor: default; }
 .phone-action--ready { cursor: pointer; background: transparent; }
+.contact-options-trigger { display: block; margin: 10px auto 0; padding: 0; border: 0; background: transparent; color: #f8f5ed; cursor: pointer; font-size: 1.45rem; text-decoration: underline; text-underline-offset: 4px; }
 .contact-options { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 15px; margin-top: 20px; }
 .contact-options a, .contact-options button { padding: 0; border: 0; background: transparent; color: #f8f5ed; cursor: pointer; font-size: 1.65rem; text-decoration: underline; text-underline-offset: 4px; }
 .contact-feedback { min-height: 1.5rem; margin-top: 7px; font-size: 1.45rem; }
